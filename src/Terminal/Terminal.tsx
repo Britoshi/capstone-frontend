@@ -55,6 +55,17 @@ export default function Terminal({
 		return () => window.removeEventListener("keydown", onKey);
 	}, []);
 
+    useEffect(() => {
+       const onMouse = (e: MouseEvent) => {
+           if (e.button === 0) {
+               e.preventDefault();
+               inputRef.current?.focus();
+           }
+       }
+       window.addEventListener("mousedown", onMouse);
+       return () => window.removeEventListener("mousedown", onMouse);
+    });
+
 	// helpers
 	const print = (l: string | string[]) =>
 		setLines(prev => [...prev, ...(Array.isArray(l) ? l : [l])]);
@@ -113,7 +124,7 @@ export default function Terminal({
 				try {
 					const data = await fetchJson("/api/ping");
 					return ["pong", JSON.stringify(data)];
-				} catch (e: any) {
+				} catch (e: Error) {
 					return [`ping error: ${e?.message ?? e}`];
 				}
 			},

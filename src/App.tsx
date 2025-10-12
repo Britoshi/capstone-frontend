@@ -3,7 +3,8 @@ import {useEffect, useState} from "react";
 import {AuthProvider, useAuthService, useCurrentUser} from "./auth/AuthProvider";
 import {LoginForm} from "./auth/LoginForm";
 import LoadingScreen from "./LoadingScreen/LoadingScreen.tsx";
-import Terminal from "./Terminal.tsx";
+import Terminal from "./Terminal/Terminal.tsx";
+import UserSelectPage from "./UserSelect/UserSelectPage.tsx";
 
 function AppInner() {
 	const auth = useAuthService();
@@ -66,9 +67,8 @@ export default function App()
 			</div>
 
 			<div style={{position: 'absolute', top: 0, left: 0, width: '100%'}}>
-				{removeLoad && <Terminal/>}
+				{removeLoad && <UserSelectPage/>}
 			</div>
-			{/* your terminal component */}
 		</div>
 	);
 }
