@@ -1,31 +1,108 @@
-﻿import {useEffect, useState} from "react";
+﻿import {useState, useRef, useEffect} from "react";
+import UserIcon from "./UserIcon";
+import type {UserType} from "./UserSelectionType.ts";
+import bg from "../assets/loginpage-bg.jpg";
+import {VISIT_KEY} from "../prefs.ts";
 
-interface LoadingProps {
-    onLogin?: (type: SelectionType) => void;
+interface UserSelectProps {
+	onLogin?: (type: UserType) => void;
 }
 
 const fadeMs = 700;
 
-type SelectionType = "none" | "guest" | "explore" | "login";
+export default function UserSelectPage({onLogin}: UserSelectProps) {
+	// First-load detection (lazy init to avoid extra renders)
+	const initialType = (): UserType => {
+		if (typeof window === "undefined") return "guest"; // SSR safety
+		const seen = window.localStorage.getItem(VISIT_KEY);
+		return seen ? "none" as UserType : "guest";
+	};
 
-export default function UserSelectPage({onLogin}: LoadingProps) {
-    return (
-        <div
-            className="w-screen h-screen flex flex-col items-center justify-center bg-[#0b0d10] text-neutral-200"
-            style={{
-                // IMPORTANT: transition must include opacity to catch 'transitionend'
-                transition: `opacity ${fadeMs}ms ease`,
-            }}
-        >
-            <div className="grid-cols-2 grid gap-10">
-                <div className="32 h-32 border-8 border-amber-100 rounded-4xl flex items-center justify-center bg-amber-100"
-                onClick={() => alert("HI")}>
+	const [selection, setSelection] = useState<UserType>(initialType);
+	const [confirm, setConfirm] = useState<UserType>(initialType);
 
-                </div>
-                <div className="w-32 h-32 border-8 border-amber-100 rounded-4xl flex items-center justify-center bg-amber-100">
+	// Mark as visited once mounted (so subsequent loads use "none")
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			window.localStorage.setItem(VISIT_KEY, "1");
+		}
+	}, []);
 
-                </div>
-            </div>
-        </div>
-    );
+	// 🔑 Reference to the icon container
+	const iconContainerRef = useRef<HTMLDivElement>(null);
+
+	const resetOnOutside = (e: React.PointerEvent<HTMLDivElement>) => {
+		const container = iconContainerRef.current;
+		if (!container) return;
+		if (!container.contains(e.target as Node)) {
+			if (confirm !== "none") setConfirm("none");
+			else if (selection !== "none") setSelection("none");
+		}
+	};
+
+	const OnLoad = () => {
+		onLogin?.(confirm);
+	};
+
+	return (
+		<div
+			onPointerDown={resetOnOutside}
+			className="w-screen h-screen flex flex-col items-center justify-center bg-[#0b0d10] text-neutral-200"
+			style={{
+				transition: `opacity ${fadeMs}ms ease`,
+				background: "transparent",
+				backgroundImage: `url(${bg})`,
+				backgroundSize: "cover",
+				backgroundPosition: "center",
+				backgroundRepeat: "no-repeat",
+			}}
+		>
+			{/* blur overlay - make sure clicks pass through */}
+			<div
+				style={{
+					position: "absolute",
+					inset: 0,
+					backdropFilter: "blur(12px)",
+					WebkitBackdropFilter: "blur(12px)",
+					backgroundColor: "rgba(0,0,0,0.2)",
+					pointerEvents: "none",
+				}}
+			/>
+
+			<div
+				ref={iconContainerRef}
+				onPointerDown={(e) => e.stopPropagation()} // 🔑 don't bubble to the outer handler
+				className="flex gap-10 h-0"
+				style={{ position: "fixed", top: "25%" }}
+			>
+				<UserIcon
+					selectionType="dev"
+					label="DEV"
+					selection={selection}
+					setSelection={setSelection}
+					confirm={confirm}
+					setConfirm={setConfirm}
+					onLoad={OnLoad}
+				/>
+				<UserIcon
+					selectionType="guest"
+					label="GUEST"
+					selection={selection}
+					setSelection={setSelection}
+					confirm={confirm}
+					setConfirm={setConfirm}
+					onLoad={OnLoad}
+				/>
+				<UserIcon
+					selectionType="login"
+					label="USER"
+					selection={selection}
+					setSelection={setSelection}
+					confirm={confirm}
+					setConfirm={setConfirm}
+					onLoad={OnLoad}
+				/>
+			</div>
+		</div>
+	);
 }

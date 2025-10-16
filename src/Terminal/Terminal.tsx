@@ -1,4 +1,6 @@
 ﻿import React, {useEffect, useMemo, useRef, useState} from "react";
+import type {UserType} from "../UserSelect/UserSelectionType.ts";
+import type {Scene} from "../SceneManager/Scenes.ts";
 
 type CommandResult = string[] | Promise<string[]>;
 type Command = (args: string[], ctx: CommandContext) => CommandResult;
@@ -13,14 +15,17 @@ type CommandContext = {
 const PROMPT = "guest@britoland:~$";
 
 export default function Terminal({
+									 SetScene,
 									 theme = "dark",
 									 onOpenPortfolio,
 									 navigate,
 								 }: {
+	SetScene: React.Dispatch<React.SetStateAction<Scene>>;
 	theme?: "dark" | "light";
 	onOpenPortfolio?: () => void;
 	navigate?: (path: string) => void;
-}) {
+})
+{
 	const [lines, setLines] = useState<string[]>([]);
 	const [input, setInput] = useState("");
 	const [history, setHistory] = useState<string[]>([]);
@@ -33,20 +38,25 @@ export default function Terminal({
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
 	// blink caret
-	useEffect(() => {
+	useEffect(() =>
+	{
 		const id = setInterval(() => setBlink(b => !b), 520);
 		return () => clearInterval(id);
 	}, []);
 
 	// auto-scroll
-	useEffect(() => {
-		scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+	useEffect(() =>
+	{
+		scrollRef.current?.scrollTo({top: scrollRef.current.scrollHeight});
 	}, [lines]);
 
 	// global '/' to focus
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "/") {
+	useEffect(() =>
+	{
+		const onKey = (e: KeyboardEvent) =>
+		{
+			if (e.key === "/")
+			{
 				e.preventDefault();
 				inputRef.current?.focus();
 			}
@@ -55,38 +65,44 @@ export default function Terminal({
 		return () => window.removeEventListener("keydown", onKey);
 	}, []);
 
-    useEffect(() => {
-       const onMouse = (e: MouseEvent) => {
-           if (e.button === 0) {
-               e.preventDefault();
-               inputRef.current?.focus();
-           }
-       }
-       window.addEventListener("mousedown", onMouse);
-       return () => window.removeEventListener("mousedown", onMouse);
-    });
+	useEffect(() =>
+	{
+		const onMouse = (e: MouseEvent) =>
+		{
+			if (e.button === 0)
+			{
+				e.preventDefault();
+				inputRef.current?.focus();
+			}
+		}
+		window.addEventListener("mousedown", onMouse);
+		return () => window.removeEventListener("mousedown", onMouse);
+	});
 
 	// helpers
 	const print = (l: string | string[]) =>
 		setLines(prev => [...prev, ...(Array.isArray(l) ? l : [l])]);
 
-	const fetchJson = async (path: string) => {
+	const fetchJson = async (path: string) =>
+	{
 		const r = await fetch(path);
 		if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
 		return r.json();
 	};
 
 	const ctx: CommandContext = useMemo(
-		() => ({ print, setTheme: setCurrentTheme, navigate, fetchJson }),
+		() => ({print, setTheme: setCurrentTheme, navigate, fetchJson}),
 		[navigate]
 	);
 
 	// command registry
-	const commands = useMemo<Record<string, Command>>(() => {
+	const commands = useMemo<Record<string, Command>>(() =>
+	{
 		return {
 			help: () => [
 				"Available commands:",
 				"  help                 Show this help",
+				"  gui					Return to Login GUI",
 				"  clear                Clear the screen",
 				"  whoami               Show current user",
 				"  echo <text>          Print text",
@@ -97,38 +113,48 @@ export default function Terminal({
 				"  ping                 Call /api/ping via proxy",
 				"  sleep <ms>           Simulate async delay",
 			],
-			clear: () => {
+			clear: () =>
+			{
 				setLines([]);
 				return [];
 			},
+			gui: () => SetScene?.("login"),
 			whoami: () => ["guest (citizen of Britoland)"],
 			echo: (args) => [args.join(" ")],
 			date: () => [new Date().toString()],
-			theme: (args, { setTheme }) => {
+			theme: (args, {setTheme}) =>
+			{
 				const t = args[0] as "dark" | "light";
 				if (t !== "dark" && t !== "light") return ["Usage: theme dark|light"];
 				setTheme(t);
 				return [`Theme set to ${t}`];
 			},
-			portfolio: () => {
+			portfolio: () =>
+			{
 				onOpenPortfolio?.();
 				return ["Opening portfolio…"];
 			},
-			open: (args, { navigate }) => {
+			open: (args, {navigate}) =>
+			{
 				if (!args[0]) return ["Usage: open /route"];
 				if (!navigate) return ["No router connected."];
 				navigate(args[0]);
 				return [`Navigating to ${args[0]}…`];
 			},
-			ping: async (_args, { fetchJson }) => {
-				try {
+			ping: async (_args, {fetchJson}) =>
+			{
+				try
+				{
 					const data = await fetchJson("/api/ping");
 					return ["pong", JSON.stringify(data)];
-				} catch (e: Error) {
+				}
+				catch (e: Error)
+				{
 					return [`ping error: ${e?.message ?? e}`];
 				}
 			},
-			sleep: async (args) => {
+			sleep: async (args) =>
+			{
 				const ms = Number(args[0] ?? 500);
 				await new Promise(r => setTimeout(r, isNaN(ms) ? 500 : ms));
 				return [`Slept ${isNaN(ms) ? 500 : ms} ms`];
@@ -139,7 +165,8 @@ export default function Terminal({
 	const allCmds = useMemo(() => Object.keys(commands).sort(), [commands]);
 
 	// submit handler
-	const run = async (raw: string) => {
+	const run = async (raw: string) =>
+	{
 		const line = raw.trim();
 		// print prompt + raw
 		setLines(prev => [...prev, `${PROMPT} ${raw}`]);
@@ -153,40 +180,54 @@ export default function Terminal({
 		setTabBuffer(null);
 		setInput("");
 
-		if (!fn) {
+		if (!fn)
+		{
 			print([`britosh: command not found: ${cmd}`, `type "help" to list commands`]);
 			return;
 		}
 
 		const out = fn(args, ctx);
-		if (out instanceof Promise) {
-			try {
+		if (out instanceof Promise)
+		{
+			try
+			{
 				const res = await out;
 				if (res.length) print(res);
-			} catch (err: any) {
+			}
+			catch (err: any)
+			{
 				print([`error: ${err?.message ?? String(err)}`]);
 			}
-		} else {
+		}
+		else
+		{
 			if (out.length) print(out);
 		}
 	};
 
 	// autocomplete on Tab
-	const handleTab = () => {
+	const handleTab = () =>
+	{
 		const cur = input.trim();
 		const [head, ...rest] = tokenize(cur);
 		if (!head) return;
 
 		const matches = allCmds.filter(c => c.startsWith(head));
-		if (matches.length === 1) {
+		if (matches.length === 1)
+		{
 			const completed = [matches[0], ...rest].join(" ") + " ";
 			setInput(completed);
 			setTabBuffer(null);
-		} else if (matches.length > 1) {
+		}
+		else if (matches.length > 1)
+		{
 			// double-tab behavior
-			if (tabBuffer === head) {
+			if (tabBuffer === head)
+			{
 				print(matches);
-			} else {
+			}
+			else
+			{
 				setTabBuffer(head);
 			}
 		}
@@ -235,25 +276,35 @@ export default function Terminal({
 								ref={inputRef}
 								value={input}
 								onChange={(e) => setInput(e.target.value)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter") {
+								onKeyDown={(e) =>
+								{
+									if (e.key === "Enter")
+									{
 										e.preventDefault();
 										run(input);
-									} else if (e.key === "Tab") {
+									}
+									else if (e.key === "Tab")
+									{
 										e.preventDefault();
 										handleTab();
-									} else if (e.key === "ArrowUp") {
+									}
+									else if (e.key === "ArrowUp")
+									{
 										e.preventDefault();
 										const next = histIndex === -1 ? history.length - 1 : Math.max(0, histIndex - 1);
 										setHistIndex(next);
 										setInput(history[next] ?? input);
-									} else if (e.key === "ArrowDown") {
+									}
+									else if (e.key === "ArrowDown")
+									{
 										e.preventDefault();
 										if (histIndex === -1) return;
 										const next = Math.min(history.length - 1, histIndex + 1);
 										setHistIndex(next);
 										setInput(history[next] ?? "");
-									} else if (e.key === "c" && e.ctrlKey) {
+									}
+									else if (e.key === "c" && e.ctrlKey)
+									{
 										e.preventDefault();
 										setLines(prev => [...prev, `${PROMPT} ${input}`, "^C"]);
 										setInput("");
@@ -285,23 +336,34 @@ function tokenize(s: string): string[] {
 	const out: string[] = [];
 	let cur = "";
 	let quote: '"' | "'" | null = null;
-	for (const ch of s) {
-		if (quote) {
-			if (ch === quote) {
+	for (const ch of s)
+	{
+		if (quote)
+		{
+			if (ch === quote)
+			{
 				quote = null;
-			} else {
+			}
+			else
+			{
 				cur += ch;
 			}
 			continue;
 		}
-		if (ch === '"' || ch === "'") {
+		if (ch === '"' || ch === "'")
+		{
 			quote = ch;
-		} else if (/\s/.test(ch)) {
-			if (cur) {
+		}
+		else if (/\s/.test(ch))
+		{
+			if (cur)
+			{
 				out.push(cur);
 				cur = "";
 			}
-		} else {
+		}
+		else
+		{
 			cur += ch;
 		}
 	}
