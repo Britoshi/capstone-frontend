@@ -1,2 +1,2 @@
 ﻿// scenes.ts
-export type Scene = "loading" | "login" | "terminal" | "desktop";
+export type Scene = "loading" | "login" | "terminal" | "desktop" | "backend-dev";

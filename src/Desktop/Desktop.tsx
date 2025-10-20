@@ -5,6 +5,7 @@ import Backdrop from "../Elements/Backdrop.tsx";
 import DesktopIcon from "./DesktopIcon.tsx";
 import portfolioIcon from "../assets/icons/portfolio.png";
 import bg from "../assets/desktop-bg.jpg";
+import GraphingCalculator from "../Apps/Calculator/GraphingCalculator.tsx";
 
 export default function Desktop({ SetScene }:
 								{ SetScene: React.Dispatch<React.SetStateAction<Scene>> })
@@ -96,9 +97,9 @@ export default function Desktop({ SetScene }:
 					gap: "12px"
 				}}
 			>
-				<DesktopIcon key="portfolio" label="Portfolio" imageUrl={portfolioIcon} OpenPage={<div>📁 Project files here</div>} />
-				<DesktopIcon key="music" label="Music" imageUrl="/icons/music.png" OpenPage={<div>🎵 My music player UI</div>} />
-				<DesktopIcon key="notes" label="Notes" imageUrl="/icons/note.png" OpenPage={<div>📝 Notes window content</div>} />
+				<DesktopIcon id="portfolio" key="portfolio" label="Portfolio" imageUrl={portfolioIcon} OpenPage={<div>📁 Project files here</div>} />
+				<DesktopIcon id="calculator" key="calculator" label="Calculator" imageUrl="/icons/music.png" OpenPage={<GraphingCalculator/>}/>
+				<DesktopIcon id="notes" key="notes" label="Notes" imageUrl="/icons/note.png" OpenPage={<div>📝 Notes window content</div>} />
 			</div>
 
 			{/* Taskbar (simple toggle behavior) */}

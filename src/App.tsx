@@ -4,7 +4,7 @@ import {useEffect, useRef, useState} from "react";
 import LoadingScreen from "./LoadingScreen/LoadingScreen";
 import UserSelectPage from "./UserSelect/UserSelectPage";
 import Terminal from "./Terminal/Terminal";
-import {useAuthService, useCurrentUser} from "./auth/AuthProvider.tsx";
+import {AuthProvider, useAuthService, useCurrentUser} from "./auth/AuthProvider.tsx";
 import {LoginForm} from "./auth/LoginForm.tsx";
 import SceneRouter from "./SceneManager/SceneRouter.tsx";
 import type {Scene} from "./SceneManager/Scenes.ts";
@@ -53,6 +53,9 @@ export default function App()
 								case "guest":
 									setScene("desktop")
 									break;
+                                case "login":
+                                    setScene("backend-dev")
+                                    break;
 								default:
 									setScene("terminal")
 									break;
@@ -73,6 +76,12 @@ export default function App()
 						<Desktop SetScene={setScene}/>
 					</div>
 				)
+            case "backend-dev":
+                return (
+                    <AuthProvider>
+                        <AppInner/>
+                    </AuthProvider>
+                )
 		}
 	};
 
