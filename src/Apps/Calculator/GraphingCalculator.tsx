@@ -57,7 +57,7 @@ export default function GraphingCalculator()
 
         // pretty LaTeX for the original function (fallback to raw on parse errors)
         let origLatex = expr;
-        try { origLatex = parse(expr).toTex(); } catch {}
+        try { origLatex = parse(expr).toTex(); } catch { /* empty */ }
 
         // Desmos expects only the RHS; worker returns "y=...": strip it
         const polyLatexRhs = data.latex.replace(/^y=/, "");

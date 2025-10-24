@@ -15,7 +15,7 @@ export default function App()
 {
 	const [scene, setScene] = useState<Scene>("loading");
 	const [allowLogin, setAllowLogin] = useState(false);
-	const [user, setUser] = useState<UserType>("guest");
+	// const [user, setUser] = useState<UserType>("guest");
 
 	useEffect(() =>
 	{

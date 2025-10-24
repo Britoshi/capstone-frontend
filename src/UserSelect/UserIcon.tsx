@@ -31,7 +31,7 @@ export default function UserIcon({selectionType, label, selection, setSelection,
 	const small = 25;
 	const delta = (big - small) / 2; // 50
 
-	useUpdate(({ dt, elapsedMs }) => {
+	useUpdate(({ dt }) => {
 		if(isConfirmed)
 		{
 			setConfirmTimer(confirmTimer + dt);
