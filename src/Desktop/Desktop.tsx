@@ -6,6 +6,7 @@ import DesktopIcon from "./DesktopIcon.tsx";
 import portfolioIcon from "../assets/icons/portfolio.png";
 import bg from "../assets/desktop-bg.jpg";
 import GraphingCalculator from "../Apps/Calculator/GraphingCalculator.tsx";
+import OrbitSimulator from "../Apps/OrbitSimulator/OrbitSimulator.tsx";
 
 export default function Desktop({ SetScene }:
 								{ SetScene: React.Dispatch<React.SetStateAction<Scene>> })
@@ -99,7 +100,7 @@ export default function Desktop({ SetScene }:
 			>
 				<DesktopIcon id="portfolio" key="portfolio" label="Portfolio" imageUrl={portfolioIcon} OpenPage={<div>📁 Project files here</div>} />
 				<DesktopIcon id="calculator" key="calculator" label="Calculator" imageUrl="/icons/music.png" OpenPage={<GraphingCalculator/>}/>
-				<DesktopIcon id="notes" key="notes" label="Notes" imageUrl="/icons/note.png" OpenPage={<div>📝 Notes window content</div>} />
+				<DesktopIcon id="orbit simulator" key="orbit simulator" label="Orbit Simulator" imageUrl="/icons/note.png" OpenPage={<OrbitSimulator/>} />
 			</div>
 
 			{/* Taskbar (simple toggle behavior) */}
